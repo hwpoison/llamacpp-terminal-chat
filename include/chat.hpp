@@ -83,7 +83,7 @@ public:
 
     void listCurrentActors();
 
-    std::string composePrompt();
+    std::string applyChatTemplate();
 
     yyjson_mut_doc* getPromptJSON();
 
@@ -94,6 +94,8 @@ public:
     bool isChatMode();
 
     bool setChatGuards(bool value);
+    
+    bool hiddeThinkTokens(bool value);
 
     yyjson_mut_doc* getCurrentPrompt();
 
@@ -103,6 +105,7 @@ private:
     bool chat_guards = true;
     bool chat_mode = true;
     bool using_system_prompt = false;
+    bool hidde_think_tokens = true;
     std::string user_name;
     std::string assistant_name;
     actors_t actors;

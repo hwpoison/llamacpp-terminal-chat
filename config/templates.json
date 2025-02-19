@@ -123,7 +123,25 @@
 				"B_USER":"<|im_start|>user",
 				"E_USER":"<|im_end|>",
 				"B_ASSISTANT":"<|im_start|>assistant",
-				"E_ASSISTANT":"<|im_end|>",
+				"E_ASSISTANT":"<|im_end|>"
+			}
+		},
+		"granite":{
+			"SEQ":{
+				"B_SYS":"<|start_of_role|>system<|end_of_role|>",
+				"E_SYS":"<|end_of_text|>",
+				"B_USER":"<|start_of_role|>user<|end_of_role|>",
+				"E_USER":"<|end_of_text|> ",
+				"B_ASSISTANT":"<|start_of_role|>assistant<|end_of_role|>"
+			}
+		},
+		"qwen_r1":{
+			"SEQ":{
+				"B_SYS":"<｜begin_of_sentence｜>",
+				"B_USER":"<｜User｜>",
+				"B_ASSISTANT":"<｜Assistant｜>",
+				"B_THINK":"<think>",
+				"E_THINK":"</think>"
 			}
 		}
 	}

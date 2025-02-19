@@ -8,6 +8,8 @@
 #include "utils.hpp"
 #include "minipost.hpp"
 #include "terminal.hpp"
+#include "colors.h"
+
 #include <csignal>
 
 #define DEFAULT_IP "127.0.0.1"
@@ -21,10 +23,9 @@
 
 extern bool stopCompletionFlag;
 extern bool completionInProgress;
+extern bool thinking;
 
 struct chat_template_t {
-    std::string prompt_type;
-
     std::string bos; // Beging of string
     std::string begin_system;
     std::string end_system;
@@ -34,6 +35,10 @@ struct chat_template_t {
 
     std::string begin_assistant;
     std::string end_assistant;
+
+    std::string begin_think;
+    std::string end_think;
+
     std::string eos; // End of string
 };
 
@@ -73,7 +78,7 @@ private:
     
     httpRequest Req;
 
-    chat_template_t chat_template = {"", "\n", "", "\n", "", "\n"};
+    chat_template_t chat_template = {"", "", "\n", "", "\n", "", "\n", "<think>", "</think>", "\n"};
 
     Dict<std::string> parameters;
 

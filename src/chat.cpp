@@ -42,16 +42,31 @@ void Chat::resetChatHistory(){
 
 void Chat::draw() {
     Terminal::clear();
+
+    chat_template_t &current_template = getChatTemplates(); 
+
     for (const message_entry_t& entry : messages) {
         printActorChaTag(entry.actor_info->name);
         std::string actor_name = entry.actor_info->name;
         
+        std::string str = entry.content;
+
         if(actor_name == "System"){
-            // Limit System draw to 300 characters.
+            // Print system prompt
+            // Limit System print to 300 characters.
             std::cout << (entry.content.length() > 300 ? entry.content.substr(0, 300) + "..." : entry.content);
             std::cout << "\n\n";
-        }else{
-            std::cout << entry.content << std::endl;
+        }else{        
+            // Print messages
+            if(hidde_think_tokens){
+                size_t endThinkTagPos = str.find(current_template.end_think);
+                if(endThinkTagPos != std::string::npos){
+                    str.erase(0, endThinkTagPos + current_template.end_think.size()); // remove from start to tag position 
+                    removeBreakLinesAtStart(str);
+                }
+            } 
+            str = highLightText(str, ANSIColors::getColorCode("green_bc"), current_template.begin_think, current_template.end_think);
+            std::cout << str << std::endl;
         }
     }
 }
@@ -210,7 +225,7 @@ bool Chat::saveConversation(std::string filename) {
 
 void Chat::printActorChaTag(std::string_view actor_name) {
     actor_t actor = actors[actor_name.data()];
-    std::cout << actor.icon << " " << ANSIColors::getColorCode(actor.tag_color) << actor.name
+    std::cout << actor.icon << (!actor.icon.empty() ? " ":"") << ANSIColors::getColorCode(actor.tag_color) << actor.name
               << ANSI_COLOR_RESET << ":";
 }
 
@@ -253,18 +268,18 @@ void Chat::cureCompletionForChat(){
 // Set all possible variations related to a chat context
 void Chat::setupChatStopWords() {
     if(chat_guards){
-        chat_template_t &templates = getChatTemplates(); 
+        chat_template_t &current_template = getChatTemplates(); 
         auto addStop = [this](std::string token) {
             if(token==""){}else{
                 if(token!="\n") addStopWord(normalizeText(token));
             }
         };
         
-        addStop(templates.begin_user);
-        addStop(templates.end_user);
-        addStop(templates.begin_system);
-        addStop(templates.end_system);
-        addStop(templates.eos);
+        addStop(current_template.begin_user);
+        addStop(current_template.end_user);
+        addStop(current_template.begin_system);
+        addStop(current_template.end_system);
+        addStop(current_template.eos);
     }
 }
 
@@ -279,7 +294,7 @@ void Chat::listCurrentActors(){
 }
 
 // Return legacy prompt with applied prompt template
-std::string Chat::composePrompt(){
+std::string Chat::applyChatTemplate(){
     std::string newPrompt;
     chat_template_t &chat_template = getChatTemplates();
     newPrompt+= chat_template.bos;
@@ -315,7 +330,7 @@ yyjson_mut_doc* Chat::getPromptJSON() {
     yyjson_mut_doc *doc = yyjson_mut_doc_new(NULL);
     yyjson_mut_val *root = yyjson_mut_obj(doc);
     yyjson_mut_doc_set_root(doc, root);
-    std::string prompt = composePrompt();
+    std::string prompt = applyChatTemplate();
     yyjson_mut_obj_add_strcpy(doc, root, "prompt", prompt.c_str());
     return doc;
 }
@@ -352,6 +367,11 @@ bool Chat::isChatMode(){
 bool Chat::setChatGuards(bool value){
     chat_guards = value;
     return chat_guards;
+}
+
+bool Chat::hiddeThinkTokens(bool value){
+    hidde_think_tokens = value;
+    return hidde_think_tokens;
 }
 
 yyjson_mut_doc* Chat::getCurrentPrompt(){

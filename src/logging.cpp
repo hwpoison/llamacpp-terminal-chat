@@ -77,17 +77,14 @@ namespace Logging {
 
 	void debug(const char* msg, ...) {
 	  if (LOG_LEVEL & DEBUG_LVL) {
-	    printf("%s", MAG "[DEBUG] " ANSI_COLOR_RESET);
 	    va_list args;
 	    va_start(args, msg);
-	    vprintf(msg, args);
-	    printf("\n");
-	    writeToFile("[DEBUG]", msg, args);
+	    writeToFile("[LOG]", msg, args);
 	    va_end(args);
 	  }
 	}
 
-	void log(const char* msg, ...) {
+	void write(const char* msg, ...) {
 	  if (LOG_LEVEL & DEBUG_LVL) {
 	    va_list args;
 	    va_start(args, msg);

@@ -2,15 +2,14 @@
 
 bool stopCompletionFlag = false;
 bool completionInProgress = false;
+bool thinkInProgress = false;
 
 bool Completion::completionCallback(const std::string &chunk, const CallbackBus *bus) {
-    if(completionInProgress){
-        Terminal::setTitle("Completing...");
-    }
     if (stopCompletionFlag) {
         Terminal::setTitle("Interrupted by user");
         stopCompletionFlag = false;
         completionInProgress = false;
+        thinkInProgress = false;
         return false; //callback will return False so streaming will stop.
     }
 
@@ -25,7 +24,7 @@ bool Completion::completionCallback(const std::string &chunk, const CallbackBus 
         if (contentKeyPos == std::string::npos) return true;
     }
     
-    Logging::log("Received data: %s", completionData.c_str());
+    Logging::debug("Received data: %s", completionData.c_str());
     
     // Parse the data
     yyjson_doc *doc = yyjson_read(completionData.c_str(), strlen(completionData.c_str()), 0);
@@ -71,7 +70,7 @@ bool Completion::completionCallback(const std::string &chunk, const CallbackBus 
     }
 
     yyjson_doc_free(doc);
-
+    
     // Check end of completation
     if (endOfCompletation) {
         if (!const_cast<CallbackBus*>(bus)->stream){
@@ -79,7 +78,7 @@ bool Completion::completionCallback(const std::string &chunk, const CallbackBus 
             const_cast<CallbackBus*>(bus)->buffer+=token;
         }
 
-        // show token/s in the terminal title
+        // once ends, show token/s in the terminal title
         char windowTitle[30];
         std::snprintf(windowTitle, sizeof(windowTitle), "%.1f t/s\n",
                       tokenPerSeconds);
@@ -88,9 +87,23 @@ bool Completion::completionCallback(const std::string &chunk, const CallbackBus 
         return false;
     }
 
-    // Print the token in terminal
+    // Think in progress
+    if(token=="<think>" && !thinkInProgress){
+        thinkInProgress = true;
+        Terminal::setTitle("Thinking...");
+        std::cout << std::endl << ANSIColors::getColorCode("green_bc");
+    }
+
+    // Print the token in terminal, here is where the text stream print happens.
     std::cout << token << std::flush;
     const_cast<CallbackBus*>(bus)->buffer+=token;
+
+    if(token=="</think>" && thinkInProgress){
+        thinkInProgress = false;
+        Terminal::setTitle("Done");
+        std::cout << ANSI_COLOR_RESET;
+    }
+
     return true;
 }
 
@@ -165,6 +178,8 @@ bool Completion::loadChatTemplates(std::string_view chat_template_name) {
     chat_template.end_user =           loadSeqToken("SEQ", "E_USER");
     chat_template.begin_assistant =    loadSeqToken("SEQ", "B_ASSISTANT");
     chat_template.end_assistant =      loadSeqToken("SEQ", "E_ASSISTANT");
+    chat_template.begin_think =        loadSeqToken("SEQ", "B_THINK");
+    chat_template.end_think =          loadSeqToken("SEQ", "E_THINK");
     chat_template.eos =                loadSeqToken("SEQ", "EOS");
 
     return true;
@@ -221,8 +236,11 @@ Response Completion::requestCompletion(
 {
     completionInProgress = true;
     std::string send_json = dumpPayload(prompt_json);
-    Logging::log("Sending: %s", send_json.c_str());
+    Logging::debug("Sending: %s", send_json.c_str());
 
+    if(completionInProgress){
+        Terminal::setTitle("Completing...");
+    }
     return Req.post(
         ipaddr, 
         port, 

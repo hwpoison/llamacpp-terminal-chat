@@ -5,25 +5,6 @@
 {
 	"params_profiles":{
 	    "creative": {
-	        "mirostat": 0,
-	        "mirostat_tau": 5,
-	        "mirostat_eta": 0.1,
-	        "frecuency_penalty": 0,
-	        "top_k": 40,
-	        "top_p": 0.5,
-	        "stop":["</s>","<|end|>","<|eot_id|>","<|end_of_text|>","<|im_end|>","<|EOT|>","<|END_OF_TURN_TOKEN|>","<|end_of_turn|>","<|endoftext|>"],
-	        "typical_p": 1,
-	        "tfz_z": 1,
-	        "n_probs":0,
-	        "presence_penalty":0,
-	        "repeat_last_n": 256,
-	        "repeat_penalty": 1.18,
-	        "temperature": 0.7,
-	        "n_predict": 250,
-	        "stream": true,
-	        "slot_id":0
-	    },
-	    "creative_oai": {
 			"stream": true,
 			"samplers": "edkypmxt",
 			"temperature": 0.8,

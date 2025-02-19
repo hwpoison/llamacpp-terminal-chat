@@ -15,7 +15,7 @@ bool httpRequest::closeConnection(SocketType connection) {
 #else
   close(connection);
 #endif
-  Logging::log("Conection closed");
+  Logging::debug("Conection closed");
   return true;
 };
 
@@ -40,15 +40,15 @@ Response httpRequest::post(
 {
 
   Response response;
-  Logging::log("Connecting to %s to port %d", ipaddr,
+  Logging::debug("Connecting to %s to port %d", ipaddr,
                 port);
-  Logging::log("Sending:", payload.c_str());
+  Logging::debug("Sending:", payload.c_str());
   SocketType connection =
     connectTo(ipaddr, port);
-  Logging::log("Socket status: %d", connection);
+  Logging::debug("Socket status: %d", connection);
   
   
-  Logging::log("Sending POST request");
+  Logging::debug("Sending POST request");
 
   std::string request_body = "POST " + std::string(endpoint)  + " HTTP/1.1\r\n";
   request_body += "Host: \r\n";
@@ -61,7 +61,7 @@ Response httpRequest::post(
   request_body += "\r\n";
   request_body += payload;
 
-  Logging::log(request_body.c_str());
+  Logging::debug(request_body.c_str());
 
   if (!this->sendData(connection, request_body.c_str())) {
     std::cout << "Error sending request." << std::endl;
@@ -72,7 +72,7 @@ Response httpRequest::post(
   char buffer[BUFFER_SIZE];
   int bytesRead;
   bool streaming=true;
-  Logging::log("Waiting recv() answer");
+  Logging::debug("Waiting recv() answer");
 
   std::string accumulatedBuffer;
   
@@ -140,7 +140,7 @@ SocketType httpRequest::connectTo(const char *ipaddr, int16_t port) {
     closeConnection(clientSocket);
     return -1;
   }
-  Logging::log("Socket created.");
+  Logging::debug("Socket created.");
   return clientSocket;
 }
 

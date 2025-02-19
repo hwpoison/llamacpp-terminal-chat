@@ -43,7 +43,7 @@ To input a command, simply insert `/command` followed by the desired command.
 - **actor** or **now** Choice who will talk now. If doesn't exists it will be created. (ie: /now  Einstein)
 - **as**: Pretend to be an actor and prompt it. (ex: /as Einstein)
 - **talkto**: Talk to a determinated character. It will swtich the current talking actor. (ie: /talkto Monica)
-- **insert** or **i**: Multiline mode insertion. For finish it and submit write "EOL" or "eol" and then enter.
+- **insert** or **i**: Multiline mode mode, write "EOL" or "eol" then enter to submit the content. Also if you prefer, can specify a file name to read and insert the content directly.
 - **retry** or **r**: Retry the last completion.
 - **continue**: Continue the completion without intervention. (The assistant will continue talking)
 - **edit**: Edit the assistant last message to re-submit it.
@@ -52,6 +52,7 @@ To input a command, simply insert `/command` followed by the desired command.
 
 🗣️Conversation mode:
 - **chat on/off:** Turn on/off chat tags.
+- **pthink on/off:** Show/hidde thoughts during model reasoning (default: hidden).
 
 💾Conversation saving:
 - **save (chatname):** Save the chat. (without extension)

@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
     
     // Setup terminal behaviours
     Terminal::setupEncoding();
-    Terminal::setTitle("Llama Chat");
+    Terminal::setTitle("LLaMA Chat");
 
     // Init chat context
     Chat chatContext;
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 
     // Load user prompt
     if(user_prompt.empty()){
-        chatContext.setupSystemPrompt("You are a very helpful assistant");
+        chatContext.setupSystemPrompt("You are a very helpful assistant.");
         chatContext.setupDefaultActors();
     }else{
         if(!chatContext.loadUserPrompt(user_prompt))
@@ -78,15 +78,15 @@ int main(int argc, char *argv[]) {
 
     // Load params profile
     if(!chatContext.loadParametersSettings(param_profile)){
-        Logging::error("Failed to load the param profile '%s' !", param_profile.c_str());
+        Logging::error("Failed to load the param profile from '%s' ! Please check it.", param_profile.c_str());
         Terminal::pause();
         exit(1);
     }
 
     chatContext.setupChatStopWords();
 
-    // Control actor talk round
-    bool onceAct = false;
+    // Control actor talk turn
+    bool singleTurn = false;
     std::string previousActingActor;
     std::string currentActor = chatContext.getAssistantName();
     
@@ -99,9 +99,9 @@ int main(int argc, char *argv[]) {
         chatContext.draw();
 
         // Control who is talking currently
-        if(onceAct){
+        if(singleTurn){
             currentActor = previousActingActor;
-            onceAct = false;
+            singleTurn = false;
         }else{
             previousActingActor = currentActor;
         }
@@ -154,7 +154,7 @@ int main(int argc, char *argv[]) {
                 exit(0);
 
             /* ----------------------------------------------------------------- */
-            /*                            FOR ROL PLAY                           */
+            /*                            FOR ROLEPLAY                           */
             /* ----------------------------------------------------------------- */
             // create and talk with a new actor
             } else if (cmd == "/actor" || cmd == "/now" || cmd == "/a") {
@@ -212,7 +212,7 @@ int main(int argc, char *argv[]) {
                 std::string narration = "*make a short narration in third person describing the current situation and characters in the chat*";
                 chatContext.addActor("Narrator", "system", "yellow", narration);
                 currentActor = "Narrator";
-                onceAct = true;
+                singleTurn = true;
 
             // view actors 
             } else if (cmd == "/lactors") {
@@ -310,6 +310,19 @@ int main(int argc, char *argv[]) {
                 chatContext.updateSystemPrompt(userInput);
                 continue;
 
+            // toggle show think tokens
+            } else if (cmd == "/pthink") {
+                if(arg == "on"){
+                    chatContext.hiddeThinkTokens(false);
+                }
+                else if(arg == "off"){
+                    chatContext.hiddeThinkTokens(true);
+                }else{
+                    Logging::warn("Invalid argument: '%s'. Expected 'on' or 'off'.", arg.c_str());
+                    Terminal::pause();
+                }
+                continue;
+
             // load param profile in runtime
             } else if (cmd == "/sparam") {
                 if(chatContext.loadParametersSettings(arg)){
@@ -322,7 +335,7 @@ int main(int argc, char *argv[]) {
                 Terminal::pause();
                 continue;
 
-            // switch chat mode (just add tags name for the conversation actors)
+            // switch chat mode (just add tags name for the conversation actors under prompt level, not gui)
             } else if (cmd == "/chat") {
                 if(arg == "on"){
                     chatContext.setChatMode(true);
@@ -344,11 +357,10 @@ int main(int argc, char *argv[]) {
             /* ----------------------------------------------------------------- */
             // show current prompt
             } else if (cmd == "/lprompt") {
-                std::cout << "[Current user prompt]    : " << user_prompt << std::endl;
+                std::cout << "[Current user prompt]    : " << (user_prompt.empty()?"None":user_prompt) << std::endl;
                 std::cout << "[Current params profile] : " << param_profile << std::endl;
-                std::cout << "[Current chat template]  : " << (chat_template.empty() ? "None": chat_template) << std::endl;
-                std::cout << "[OAI Completion enabled] : " << (chatContext.using_oai_completion?"Yes":"No") << std::endl;
-                std::cout << "\n+Current prompt content:\n\n```\n" << chatContext.composePrompt() << "\n```\n";
+                std::cout << "[Current chat template]  : " << (chat_template.empty() ? "OAI mode": chat_template) << std::endl;
+                std::cout << "\n+Current prompt content:\n\n```\n" << chatContext.applyChatTemplate() << "\n```\n";
                 Terminal::pause();
                 continue;
                 
@@ -364,16 +376,28 @@ int main(int argc, char *argv[]) {
             /* ----------------------------------------------------------------- */
             // multiline insertion mode
             } else if (cmd == "/insert" || cmd == "/i") {
-                userInput.clear();
-                Terminal::setTitle("Multiline mode");
-                std::string line;
-                while(1){
-                    std::getline(std::cin, line);
-                    if(line == "EOL" or line == "eol") break;
-                    userInput+= line + "\n";
-                };
+                // read content from a file
+                if(!arg.empty()) {
+                    std::string newText = readFileContent(arg);
+                    if(newText.empty()){
+                        Logging::warn("Error reading the file content");
+                        Terminal::pause();
+                        continue;
+                    }
+                    userInput=newText;
+                }else{ // enable multiline input mod
+                    userInput.clear();
+                    Terminal::setTitle("Multiline mode");
+                    std::string line;
+                    while(1){
+                        std::getline(std::cin, line);
+                        if(line == "EOL" or line == "eol") break;
+                        userInput+= line + "\n";
+                    };
+                }
                 chatContext.addNewMessage(chatContext.getUserName(), userInput);
-
+                chatContext.draw();
+                
             // edit assistant previos message
             } else if (cmd == "/edit") {
                 chatContext.removeLastMessage(1);
@@ -384,7 +408,7 @@ int main(int argc, char *argv[]) {
                 continue;
 
             // undo only last message
-            } else if (cmd == "/undolast") {
+            } else if (cmd == "/undolast" || cmd == "/ul") {
                 chatContext.removeLastMessage(1);
                 continue;
 
@@ -405,7 +429,7 @@ int main(int argc, char *argv[]) {
                 chatContext.draw();
 
             // just continue the completation witht the current actor
-            } else if (cmd == "/continue") {
+            } else if (cmd == "/continue" || cmd == "/c") {
             
             // ...
             } else {
@@ -425,9 +449,7 @@ int main(int argc, char *argv[]) {
         if(!chatContext.using_oai_completion) chatContext.addNewMessage(currentActor, ""); 
 
         // Send for completion
-        #ifdef __WIN32__
         Terminal::setTitle("Thinking...");
-        #endif
         Response res = chatContext.requestCompletion(ipaddr, port, chatContext.getCurrentPrompt());
         if (res.Status != HTTP_OK) {
             if (res.Status == HTTP_INTERNAL_ERROR)

@@ -34,6 +34,12 @@ std::string toLowerCase(std::string_view input) {
     return result;
 }
 
+void removeBreakLinesAtStart(std::string& str) {
+    size_t pos = 0;
+    while (pos < str.size() && str[pos] == '\n'){ ++pos; }
+    str.erase(0, pos);
+}
+
 const std::string getCurrentDate() {
     time_t     now = time(0);
     struct tm  tstruct;
@@ -56,6 +62,43 @@ const char *get_arg_value(int argc, char **argv, const char *target_arg){
     return nullptr;
 }
 
+std::string highLightText(std::string text, std::string color, std::string start, std::string end) {
+    // this is for colorize text from x to y ex: colour <tag> .... </tag> content.
+    size_t start_p = text.find(start);
+    if(start_p == std::string::npos) return text;
+
+    size_t end_p   = text.find(end);
+    if(end_p == std::string::npos) return text;
+
+    text.insert(start_p, color);
+    end_p += color.size() + end.size();
+    text.insert(end_p, "\e[0m"); // reset color
+
+    return text;
+}
+
+std::string readFileContent(const std::string& file_name) {
+    std::ifstream file(file_name);
+    if (!file.is_open()) {
+        return "";
+    }
+
+    std::string content;
+    std::string line;
+    bool firstLine = true;
+
+    while (getline(file, line)) {
+        if (!firstLine) {
+            content += "\n";
+        }
+        content += line;
+        firstLine = false;
+    }
+
+    file.close();
+    return content;
+}
+
 void printCmdHelp(){
     std::cout << "Usage:\n \
     --prompt <my_prompt_name> (default: creative)\n \
@@ -75,7 +118,7 @@ void printChatHelp() {
     /actor / now: Choose who will talk now. If the actor doesn't exist, it will be created. (e.g., /now Einstein)\n \
     /as: Pretend to be an actor and prompt it. (e.g., /as Einstein)\n \
     /talkto: Talk to a specific character. It will switch the current talking actor. (e.g., /talkto Monica)\n \
-    /insert / i: Multiline mode insertion. To finish and submit, write \"EOL\" or \"eol\" and then press enter.\n \
+    /insert / i: Multiline mode insertion. To finish and submit, write \"EOL\" or \"eol\" and then press enter. Also support read the content from a file.\n \
     /retry / r: Retry the last completion.\n \
     /edit: Edit the assistant last message to re-submit it. \n \
     /continue: Continue the completion without intervention. (The assistant will continue talking)\n \
@@ -83,6 +126,7 @@ void printChatHelp() {
     /undo / u: Undo the last completion and user input.\n\n \
 Conversation mode:\n \
     /chat on/off: Turn on/off chat tags.\n\n \
+    /pthink on/off: show/hidde thoughts during model reasoning.\n\n \
 Conversation saving:\n \
     /save (chatname): Save the chat (without extension).\n \
     /load (chatname): Load a previously saved chat.\n\n \
@@ -99,5 +143,4 @@ Manage configurations:\n \
     /stemplate (template name): Load and set prompt template in runtime from template.json.\n \
     /ssystem (new system prompt): Set new system prompt (from begin).\n \
     /sprompt (prompt name): Load and set custom prompt in runtime from prompt.json.\n\n" << std::endl;
-
 }

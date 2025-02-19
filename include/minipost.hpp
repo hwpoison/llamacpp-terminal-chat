@@ -23,7 +23,7 @@
 #include "logging.hpp"
 #include "terminal.hpp"
 
-#define BUFFER_SIZE 100000 // 100kb
+#define BUFFER_SIZE 10000 // 10kb
 #define HTTP_INTERNAL_ERROR 500
 #define HTTP_OK 200
 
