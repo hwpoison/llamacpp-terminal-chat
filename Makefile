@@ -1,7 +1,7 @@
 CC = g++
-CPPFLAGS= -std=c++17 -s -Os -flto=auto -fno-ident -fno-ident -fno-asynchronous-unwind-tables -fvisibility=hidden -fmerge-all-constants -fno-exceptions -Iinclude -I./yyjson/src
+CPPFLAGS= -std=c++17 -s -Os -flto=auto -fno-ident -fno-ident -fno-asynchronous-unwind-tables -fvisibility=hidden -fmerge-all-constants -fno-exceptions -Iinclude -I./yyjson/src -fexceptions
 SFLAGS= -static-libgcc -static-libstdc++ -static
-LDFLAGS += -Lyyjson  
+LDFLAGS += -Lyyjson -lreadline -ltinfo
 OBJECTS := build/minipost.o build/terminal.o build/completion.o build/sjson.o build/utils.o build/logging.o build/chat.o build/yyjson.o
 
 COPY_FILES = $(if $(filter Windows_NT, $(OS)), \

@@ -229,6 +229,17 @@ void Chat::printActorChaTag(std::string_view actor_name) {
               << ANSI_COLOR_RESET << ":";
 }
 
+std::string Chat::returnActorChaTag(std::string_view actor_name) {
+    actor_t actor = actors[actor_name.data()];
+    std::string result = actor.icon;
+    if (!actor.icon.empty()) {
+        result += " ";
+    }
+    result += ANSIColors::getColorCode(actor.tag_color) + actor.name + ANSI_COLOR_RESET + ":";
+    return result;
+}
+
+
 bool Chat::addActor(
         std::string name, 
         const char* role, 

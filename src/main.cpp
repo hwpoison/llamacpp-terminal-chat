@@ -46,6 +46,13 @@ int main(int argc, char *argv[]) {
     Terminal::setupEncoding();
     Terminal::setTitle("LLaMA Chat");
 
+    // Initialize Readline
+    rl_bind_key('\t', rl_insert);  // Optional: bind Tab to insert
+//    history_preserve_point(1);
+
+    // Initialize History
+    using_history();
+
     // Init chat context
     Chat chatContext;
     chatContext.setChatGuards(chat_guards);
@@ -106,15 +113,24 @@ int main(int argc, char *argv[]) {
             previousActingActor = currentActor;
         }
 
-        // Print user chat tag
-        chatContext.printActorChaTag(chatContext.getUserName());
-        Terminal::resetColor();
+        // No longer print user chat tag. Now, it is printed as part of the readline prompt
+        // chatContext.printActorChaTag(chatContext.getUserName());
+        // Terminal::resetColor();
         
         // Prepare CTRL+C stop completion signal
         signal(SIGINT, completionSignalHandler);
 
-        // Get user input
-        std::getline(std::cin, userInput);
+        std::string actorTag = chatContext.returnActorChaTag(chatContext.getUserName());
+
+	rl_set_prompt(actorTag.c_str());
+
+        char* rl_input = readline(actorTag.c_str());
+        if (!rl_input) break;  // Break loop when Ctrl+D encountered
+        if (*rl_input) {
+            add_history(rl_input);
+        }
+
+        userInput = rl_input;
 
         // Reset cin state during ctrl+c
         if (std::cin.fail() || std::cin.eof()) {

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////
-// All chat templates                  
+// All prompt templates                  
 /*
 	SEQ: Header and Footer for determinated roles. (optionals)
 		B_SYS and E_SYS: System
@@ -9,7 +9,7 @@
 */
 ///////////////////////////////////////////
 {
-	"chat_templates":{
+	"prompt_templates":{
 		"empty":
 		{
 			"SEQ":{
@@ -29,6 +29,14 @@
 				"EOS":			"<|im_end|>\n"
 			}
 		},
+		"deepseek":
+		{
+			"SEQ":{
+				"B_USER":		"<|User|>\n",
+				"B_ASSISTANT":	"<|Assistant|>\n",
+				"EOS":			"<|end_of_sentence|>\n"
+			}
+		},
 		"stablelm":
 		{
 			"SEQ":{
@@ -39,16 +47,6 @@
 			}
 		},
 		"mistral_v0.2":
-		{
-			"SEQ":{
-				"BOS":			"<s>",
-				"B_USER":		"[INST]",
-				"E_USER":		"[/INST]",
-				"B_ASSISTANT":	"",
-				"EOS":			"</s>"
-			}
-		},
-		"mistral_v0.2_chat":
 		{
 			"SEQ":{
 				"BOS":			"<s>",
@@ -78,14 +76,6 @@
 				"B_ASSISTANT":	"<|assistant|>\n",
 			}
 		},
-		"phi3":
-		{
-			"SEQ":{
-				"B_USER":		"<|user|>\n",
-				"E_USER":		"<|end|>\n",
-				"B_ASSISTANT":	"<|assistant|>\n",
-			}
-		},
 		"zephyr":
 		{
 			"SEQ":{
@@ -97,51 +87,14 @@
 				"E_ASSISTANT":   "<|endoftext|>\n"
 			}
 		},
-		"gemma2b":{
+		"gemma":
+		{
 			"SEQ":{
-				"BOS":"<bos>",
-				"B_USER":"<start_of_turn>",
-				"E_USER":"<end_of_turn>",
-				"B_ASSISTANT":"<start_of_turn>model"
-			}
-		},
-		"llama3.2":{
-		    "SEQ":{
-				"B_SYS":		"<|start_header_id|>system<|end_header_id|>\n\n",
-				"E_SYS":		"\n",
-				"B_USER":		"<|start_header_id|>user<|end_header_id|>\n",
-				"E_USER": 		"<|eot_id|>",
-				"B_ASSISTANT":	"<|start_header_id|>assistant<|end_header_id|>\n",
-				"E_ASSISTANT": 	"<|eot_id|>\n"
-				
-			}
-		},
-		"phi3.5":{
-			"SEQ":{
-				"B_SYS":"<|im_start|>",
-				"E_SYS":"<|im_end|>",
-				"B_USER":"<|im_start|>user",
-				"E_USER":"<|im_end|>",
-				"B_ASSISTANT":"<|im_start|>assistant",
-				"E_ASSISTANT":"<|im_end|>"
-			}
-		},
-		"granite":{
-			"SEQ":{
-				"B_SYS":"<|start_of_role|>system<|end_of_role|>",
-				"E_SYS":"<|end_of_text|>",
-				"B_USER":"<|start_of_role|>user<|end_of_role|>",
-				"E_USER":"<|end_of_text|> ",
-				"B_ASSISTANT":"<|start_of_role|>assistant<|end_of_role|>"
-			}
-		},
-		"qwen_r1":{
-			"SEQ":{
-				"B_SYS":"<｜begin_of_sentence｜>",
-				"B_USER":"<｜User｜>",
-				"B_ASSISTANT":"<｜Assistant｜>",
-				"B_THINK":"<think>",
-				"E_THINK":"</think>"
+				"B_SYS":		"<bos>",
+				"B_USER":		"<start_of_turn>user\n",
+				"E_USER":		"<end_of_turn>\n",
+				"B_ASSISTANT":	"<start_of_turn>model\n",
+				"E_ASSISTANT":   "<end_of_turn>\n"
 			}
 		}
 	}

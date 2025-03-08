@@ -12,6 +12,10 @@
 #include "colors.h"
 #include "logging.hpp"
 #include "utils.hpp"
+#include <readline/readline.h>
+#include <readline/history.h>
+#include <cstdlib>
+#include <cstring>
 
 #define DEFAULT_FILE_EXTENSION ".json"
 #define USER_PROMPT_FILE "prompts.json"
@@ -64,6 +68,8 @@ public:
     bool loadSavedConversation(std::string file_path);
 
     bool saveConversation(std::string filename);
+
+    std::string returnActorChaTag(std::string_view actor_name);
 
     void printActorChaTag(std::string_view actor_name);
     
