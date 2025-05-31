@@ -1,8 +1,12 @@
 #include "completion.hpp"
-
 bool stopCompletionFlag = false;
 bool completionInProgress = false;
 bool thinkInProgress = false;
+
+inline std::string safeGetStr(yyjson_val* val) {
+    const char* str = yyjson_get_str(val);
+    return str ? str : "";
+}
 
 bool Completion::completionCallback(const std::string &chunk, const CallbackBus *bus) {
     if (stopCompletionFlag) {
@@ -55,12 +59,12 @@ bool Completion::completionCallback(const std::string &chunk, const CallbackBus 
         }else{
             yyjson_val *delta = yyjson_obj_get(content_array, "delta");
             yyjson_val *content = yyjson_obj_get(delta, "content");
-            token = yyjson_get_str(content);
+            token = safeGetStr(content);
         }
     }else{
         yyjson_val *content = yyjson_obj_get(root, "content");
-        token = yyjson_get_str(content);
-
+        
+        token = safeGetStr(content);
         yyjson_val *timings = yyjson_obj_get(root, "timings");
         yyjson_val *predicted_per_second = yyjson_obj_get(timings, "predicted_per_second");
 
