@@ -13,5 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v4
+    - name: create-dir
+      run: mkdir ./dist
     - name: make
       run: make
